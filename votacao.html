@@ -6,14 +6,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Votação 2026 - Votar</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body style="background-color: #2b170c; color: #fff;">
 
-  <nav class="navbar navbar-expand-md navbar-dark navbar-farm px-4">
+  <nav class="navbar navbar-expand-md navbar-dark px-4" style="background-color: #1a0d07; border-bottom: 2px solid #f0b541;">
     <div class="container-fluid px-0">
       <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
-        <img src="img/logo.png" alt="Logo" width="40" height="40" class="me-2 rounded-circle" onerror="this.style.display='none'">
+        <img src="https://unsplash.com" alt="Logo" width="40" height="40" class="me-2 rounded-circle">
         Votação 2026
       </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -22,27 +21,27 @@
       <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
         <ul class="navbar-nav gap-2">
           <li class="nav-item"><a class="nav-link px-3" href="index.html">Início</a></li>
-          <li class="nav-item"><a class="nav-link active px-3" href="votacao.html">Votar</a></li>
-          <li class="nav-item"><a class="nav-link px-3" href="resultado.html">Resultado</a></li>
+          <li class="nav-item"><a class="nav-link active px-3 fw-bold" style="color: #f0b541;" href="votacao.html">Votar</a></li>
+          <li class="nav-item"><a class="nav-link px-3" href="resultado.html">Resultados</a></li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <div class="container my-4">
-    <h2 class="font-serif fw-bold" style="color: #f0b541;">Quem você quer eliminar?</h2>
-    <p class="mb-4">Como dita a tradição, em A Fazenda o voto é para eliminar.</p>
+  <div class="container my-5">
+    <h2 class="fw-bold" style="color: #f0b541; font-family: serif;">Quem você quer eliminar?</h2>
+    <p class="mb-5 text-white-50 fs-5">Como dita a tradição, em A Fazenda o voto é para eliminar.</p>
     
     <div id="alert-container"></div>
 
     <div id="roca-container" class="row row-cols-1 row-cols-md-3 g-4 mb-5">
-      <!-- Dinâmico -->
+      <!-- Inserido dinamicamente via JS -->
     </div>
 
-    <h3 class="font-serif mb-3 text-white-50 border-bottom border-secondary pb-2">Demais peões</h3>
-    <div class="mb-2 text-white-50"><small>Estes peões estão na sede e não podem receber votos.</small></div>
-    <div id="sede-container" class="row row-cols-3 row-cols-md-6 g-3 peao-grid">
-      <!-- Dinâmico -->
+    <h3 class="mt-5 mb-3 pb-2 border-bottom border-secondary text-white-50" style="font-family: serif;">Demais peões</h3>
+    <div class="mb-4 text-white-50"><small>Estes peões estão na sede e não podem receber votos.</small></div>
+    <div id="sede-container" class="row row-cols-3 row-cols-md-6 g-4">
+      <!-- Inserido dinamicamente via JS -->
     </div>
   </div>
 
@@ -53,18 +52,27 @@
       const sedeContainer = document.getElementById("sede-container");
       const alertContainer = document.getElementById("alert-container");
 
+      // Função auxiliar para injetar foto da internet caso o link local falhe ou não exista
+      const checarFoto = (fotoUrl, id) => {
+        if (!fotoUrl || fotoUrl.includes("img/") || fotoUrl.includes("assets/")) {
+          return `https://pravatar.cc{id + 10}`;
+        }
+        return fotoUrl;
+      };
+
       try {
         const naRoca = await getParticipantes(true);
         naRoca.forEach(p => {
+          const fotoValida = checarFoto(p.foto, p.id);
           const col = document.createElement("div");
           col.className = "col";
           col.innerHTML = `
-            <div class="card card-cream h-100 card-roca position-relative">
-              <span class="badge position-absolute top-0 end-0 mt-3 me-1 badge-roca text-uppercase fw-bold">Na roça</span>
-              <img src="${p.foto}" alt="${p.nome}" class="card-img-top">
-              <div class="card-body text-center d-flex flex-column px-2 pb-2 pt-3">
-                <h4 class="card-title font-serif fw-bold mb-3">${p.nome}</h4>
-                <button class="btn btn-danger w-100 mt-auto fw-bold btn-votar" data-id="${p.id}" data-nome="${p.nome}">Votar para eliminar</button>
+            <div class="card h-100 position-relative border-0 shadow" style="background-color: #fdfaf6; color: #2b170c; border-radius: 15px; overflow: hidden;">
+              <span class="badge position-absolute top-0 end-0 mt-3 me-3 text-uppercase fw-bold bg-danger px-3 py-2" style="border-radius: 20px; z-index: 5;">Na roça</span>
+              <img src="${fotoValida}" alt="${p.nome}" class="card-img-top" style="height: 280px; object-fit: cover;">
+              <div class="card-body text-center d-flex flex-column p-4">
+                <h4 class="card-title fw-bold mb-4" style="font-family: serif;">${p.nome}</h4>
+                <button class="btn btn-danger w-100 mt-auto fw-bold py-2 btn-votar" data-id="${p.id}" data-nome="${p.nome}" style="border-radius: 8px;">Votar para eliminar</button>
               </div>
             </div>
           `;
@@ -73,34 +81,44 @@
 
         const naSede = await getParticipantes(false);
         naSede.forEach(p => {
+          const fotoValida = checarFoto(p.foto, p.id);
           const col = document.createElement("div");
           col.className = "col text-center";
           col.innerHTML = `
-            <img src="${p.foto}" alt="${p.nome}">
-            <small class="text-white d-block lh-sm">${p.nome}</small>
+            <div class="position-relative d-inline-block">
+              <img src="${fotoValida}" alt="${p.nome}" class="rounded-circle border border-2 border-secondary mb-2" style="width: 90px; height: 90px; object-fit: cover;">
+            </div>
+            <small class="text-white d-block fw-semibold">${p.nome}</small>
           `;
           sedeContainer.appendChild(col);
         });
 
-        document.querySelectorAll(".btn-votar").forEach(button => {
-          button.addEventListener("click", async (e) => {
+        // Configuração do clique de votação delegado ao documento para garantir funcionamento estável
+        document.addEventListener("click", async (e) => {
+          if (e.target && e.target.classList.contains("btn-votar")) {
             const id = e.target.getAttribute("data-id");
             const nome = e.target.getAttribute("data-nome");
 
-            await registrarVoto(id);
-            const votos = await getVotos();
-            const qtd = votos.filter(v => v.participanteId == id).length;
+            try {
+              await registrarVoto(id);
+              const votos = await getVotos();
+              const qtd = votos.filter(v => v.participanteId == id).length;
 
-            alertContainer.innerHTML = `
-              <div class="alert text-dark fw-bold mb-4" style="background-color: #d1e7dd; border-left: 6px solid #198754;" role="alert">
-                Voto registrado com sucesso em <strong>${nome}</strong>. Você já votou ${qtd} vez(es).
-              </div>
-            `;
-            window.scrollTo(0, 0);
-          });
+              alertContainer.innerHTML = `
+                <div class="alert alert-success border-0 shadow-sm fw-bold mb-4 text-dark p-3" style="background-color: #d1e7dd; border-left: 6px solid #198754 !important;" role="alert">
+                  ✨ Voto registrado com sucesso em <span class="text-danger">${nome}</span>! Você já votou ${qtd} vez(es) nessa rodada.
+                </div>
+              `;
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            } catch (err) {
+              console.error("Erro ao computar voto:", err);
+            }
+          }
         });
 
-      } catch (error) { console.error(error); }
+      } catch (error) { 
+        console.error("Erro ao carregar participantes:", error); 
+      }
     });
   </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>

@@ -1,3 +1,4 @@
+<!-- resultado.html -->
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -5,28 +6,32 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>A Fazenda - Resultado</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
 </head>
-<body>
+<body style="background-color: #2b170c; color: #fff;">
 
-  <nav class="navbar navbar-expand-md navbar-dark navbar-farm px-4">
-    <a class="navbar-brand fw-bold" href="index.html">🌾 A Fazenda</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-      <span class="navbar-toggler-icon"></span>
-    </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav ms-auto">
-        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
-        <li class="nav-item"><a class="nav-link" href="votar.html">Votar</a></li>
-        <li class="nav-item"><a class="nav-link active" href="resultado.html">Resultado</a></li>
-      </ul>
+  <nav class="navbar navbar-expand-md navbar-dark px-4" style="background-color: #1a0d07; border-bottom: 2px solid #f0b541;">
+    <div class="container-fluid px-0">
+      <a class="navbar-brand fw-bold d-flex align-items-center" href="index.html">
+        <img src="https://unsplash.com" alt="Logo" width="40" height="40" class="me-2 rounded-circle">
+        Votação 2026
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse justify-content-end" id="navbarNav">
+        <ul class="navbar-nav gap-2">
+          <li class="nav-item"><a class="nav-link px-3" href="index.html">Início</a></li>
+          <li class="nav-item"><a class="nav-link px-3" href="votacao.html">Votar</a></li>
+          <li class="nav-item"><a class="nav-link active px-3 fw-bold" style="color: #f0b541;" href="resultado.html">Resultado</a></li>
+        </ul>
+      </div>
     </div>
   </nav>
 
   <div class="container my-5">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h2 class="text-warning fw-bold">Parcial da eliminação</h2>
-      <button class="btn btn-outline-danger px-3" data-bs-toggle="modal" data-bs-target="#modalZerar">Zerar votação</button>
+    <div class="d-flex justify-content-between align-items-center mb-5 flex-wrap gap-3">
+      <h2 class="fw-bold mb-0" style="color: #f0b541; font-family: serif;">Parcial da eliminação</h2>
+      <button class="btn btn-outline-danger px-4 fw-bold" style="border-radius: 8px;" data-bs-toggle="modal" data-bs-target="#modalZerar">Zerar votação</button>
     </div>
 
     <div id="resultado-content">
@@ -36,18 +41,18 @@
 
   <!-- Modal de Confirmação para Zerar Votação -->
   <div class="modal fade" id="modalZerar" tabindex="-1" aria-labelledby="modalZerarLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content card-farm text-light">
-        <div class="modal-header border-bottom border-secondary">
-          <h5 class="modal-title text-warning" id="modalZerarLabel">Confirmar Zerar Votação</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content text-dark border-0 shadow" style="background-color: #fdfaf6; border-radius: 15px;">
+        <div class="modal-header border-bottom border-light-subtle p-4">
+          <h5 class="modal-title fw-bold text-danger" id="modalZerarLabel" style="font-family: serif;">Confirmar Zerar Votação</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-        <div class="modal-body">
+        <div class="modal-body p-4 fs-5 text-secondary">
           Tem certeza que deseja zerar todos os votos computados? Esta ação não poderá ser desfeita.
         </div>
-        <div class="modal-footer border-top border-secondary">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-          <button type="button" class="btn btn-danger" id="btnConfirmarZerar">Zerar votação</button>
+        <div class="modal-footer border-top border-light-subtle p-3">
+          <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal" style="border-radius: 8px;">Cancelar</button>
+          <button type="button" class="btn btn-danger px-4 fw-bold" id="btnConfirmarZerar" style="border-radius: 8px;">Zerar votação</button>
         </div>
       </div>
     </div>
@@ -58,19 +63,26 @@
     document.addEventListener("DOMContentLoaded", async () => {
       const container = document.getElementById("resultado-content");
 
+      // Função para injetar foto estável da internet caso o banco de dados não tenha
+      const checarFoto = (fotoUrl, id) => {
+        if (!fotoUrl || fotoUrl.includes("img/") || fotoUrl.includes("assets/")) {
+          return `https://pravatar.cc{id + 10}`;
+        }
+        return fotoUrl;
+      };
+
       async function carregarResultados() {
         try {
           const participantesRoca = await getParticipantes(true);
           const votos = await getVotos();
           const totalVotos = votos.length;
 
-          // Estado sem votos conforme referência da Figura 4
           if (totalVotos === 0) {
             container.innerHTML = `
-              <div class="card card-farm text-center p-5 shadow">
-                <p class="text-light mb-3">Nenhum voto ainda. Escolha quem vai de mais para ver a parcial.</p>
+              <div class="card text-center p-5 shadow border-0" style="background-color: #1a0d07; border-radius: 15px;">
+                <p class="text-white-50 fs-5 mb-4">Nenhum voto computado ainda nesta rodada. Escolha quem vai sair para ver a parcial.</p>
                 <div>
-                  <a href="votar.html" class="btn btn-danger fw-bold px-4">Ir para a roça</a>
+                  <a href="votacao.html" class="btn btn-danger fw-bold px-4 py-2" style="border-radius: 8px;">Ir para a votação</a>
                 </div>
               </div>
             `;
@@ -86,24 +98,26 @@
           // Ordena do mais votado para o menos votado
           contagem.sort((a, b) => b.qtd - a.qtd);
 
-          let html = `<p class="text-light mb-4"><strong>${totalVotos}</strong> votos computados</p>`;
+          let html = `<p class="text-white-50 fs-5 mb-4">🔥 <strong>${totalVotos}</strong> votos computados no total</p>`;
 
           contagem.forEach((p, index) => {
             const isMaisVotado = index === 0;
+            const fotoValida = checarFoto(p.foto, p.id);
+            
             html += `
-              <div class="card card-farm p-3 mb-3 shadow">
-                <div class="row align-items-center">
+              <div class="card p-4 mb-3 shadow border-0" style="background-color: #1a0d07; border-radius: 12px;">
+                <div class="row align-items-center g-3">
                   <div class="col-md-2 text-center position-relative">
-                    <img src="${p.foto}" class="rounded-circle border border-2 border-warning" style="width: 70px; height: 70px; object-fit: cover;" alt="${p.nome}">
-                    ${isMaisVotado ? '<span class="badge bg-danger position-absolute top-0 start-50 translate-middle">Sairia hoje</span>' : ''}
+                    <img src="${fotoValida}" class="rounded-circle border border-2 ${isMaisVotado ? 'border-danger' : 'border-warning'}" style="width: 85px; height: 85px; object-fit: cover;" alt="${p.nome}">
+                    ${isMaisVotado ? '<span class="badge bg-danger position-absolute top-0 start-50 translate-middle text-uppercase" style="font-size: 0.7rem; border-radius: 10px; padding: 5px 10px;">Sairia hoje</span>' : ''}
                   </div>
                   <div class="col-md-10">
-                    <div class="d-flex justify-content-between mb-1">
-                      <h5 class="mb-0 fw-bold text-light">${p.nome}</h5>
-                      <span class="text-light"><strong>${p.percentual}%</strong> (${p.qtd} votos)</span>
+                    <div class="d-flex justify-content-between mb-2 flex-wrap">
+                      <h4 class="mb-0 fw-bold text-white" style="font-family: serif;">${p.nome}</h4>
+                      <span class="fs-5" style="color: ${isMaisVotado ? '#dc3545' : '#ffc107'};"><strong>${p.percentual}%</strong> <span class="text-white-50" style="font-size: 0.9rem;">(${p.qtd} votos)</span></span>
                     </div>
-                    <div class="progress" style="height: 15px;">
-                      <div class="progress-bar ${isMaisVotado ? 'bg-danger' : 'bg-warning'}" role="progressbar" style="width: ${p.percentual}%"></div>
+                    <div class="progress" style="height: 16px; background-color: #2b170c; border-radius: 8px;">
+                      <div class="progress-bar ${isMaisVotado ? 'bg-danger progress-bar-striped progress-bar-animated' : 'bg-warning'}" role="progressbar" style="width: ${p.percentual}%; border-radius: 8px;"></div>
                     </div>
                   </div>
                 </div>
@@ -121,11 +135,15 @@
 
       // Confirmação para limpar votos via DELETE
       document.getElementById("btnConfirmarZerar").addEventListener("click", async () => {
-        await zerarVotos();
-        const modalElement = document.getElementById('modalZerar');
-        const modal = bootstrap.Modal.getInstance(modalElement);
-        modal.hide();
-        carregarResultados();
+        try {
+          await zerarVotos();
+          const modalElement = document.getElementById('modalZerar');
+          const modal = bootstrap.Modal.getInstance(modalElement);
+          modal.hide();
+          carregarResultados();
+        } catch (err) {
+          console.error("Erro ao zerar votação:", err);
+        }
       });
     });
   </script>
