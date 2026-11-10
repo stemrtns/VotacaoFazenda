@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>A Fazenda - Resultado</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <nav class="navbar navbar-expand-md navbar-dark navbar-farm px-4">
+    <a class="navbar-brand fw-bold" href="index.html">🌾 A Fazenda</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="index.html">Início</a></li>
+        <li class="nav-item"><a class="nav-link" href="votar.html">Votar</a></li>
+        <li class="nav-item"><a class="nav-link active" href="resultado.html">Resultado</a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h2 class="text-warning fw-bold">Parcial da eliminação</h2>
+      <button class="btn btn-outline-danger px-3" data-bs-toggle="modal" data-bs-target="#modalZerar">Zerar votação</button>
+    </div>
+
+    <div id="resultado-content">
+      <!-- Conteúdo injetado via JS -->
+    </div>
+  </div>
+
+  <!-- Modal de Confirmação para Zerar Votação -->
+  <div class="modal fade" id="modalZerar" tabindex="-1" aria-labelledby="modalZerarLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content card-farm text-light">
+        <div class="modal-header border-bottom border-secondary">
+          <h5 class="modal-title text-warning" id="modalZerarLabel">Confirmar Zerar Votação</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Tem certeza que deseja zerar todos os votos computados? Esta ação não poderá ser desfeita.
+        </div>
+        <div class="modal-footer border-top border-secondary">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-danger" id="btnConfirmarZerar">Zerar votação</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const container = document.getElementById("resultado-content");
+
+      async function carregarResultados() {
+        try {
+          const participantesRoca = await getParticipantes(true);
+          const votos = await getVotos();
+          const totalVotos = votos.length;
+
+          // Estado sem votos conforme referência da Figura 4
+          if (totalVotos === 0) {
+            container.innerHTML = `
+              <div class="card card-farm text-center p-5 shadow">
+                <p class="text-light mb-3">Nenhum voto ainda. Escolha quem vai de mais para ver a parcial.</p>
+                <div>
+                  <a href="votar.html" class="btn btn-danger fw-bold px-4">Ir para a roça</a>
+                </div>
+              </div>
+            `;
+            return;
+          }
+
+          const contagem = participantesRoca.map(p => {
+            const qtd = votos.filter(v => v.participanteId == p.id || v.participantId == p.id).length;
+            const percentual = totalVotos > 0 ? ((qtd / totalVotos) * 100).toFixed(1) : 0;
+            return { ...p, qtd, percentual: parseFloat(percentual) };
+          });
+
+          // Ordena do mais votado para o menos votado
+          contagem.sort((a, b) => b.qtd - a.qtd);
+
+          let html = `<p class="text-light mb-4"><strong>${totalVotos}</strong> votos computados</p>`;
+
+          contagem.forEach((p, index) => {
+            const isMaisVotado = index === 0;
+            html += `
+              <div class="card card-farm p-3 mb-3 shadow">
+                <div class="row align-items-center">
+                  <div class="col-md-2 text-center position-relative">
+                    <img src="${p.foto}" class="rounded-circle border border-2 border-warning" style="width: 70px; height: 70px; object-fit: cover;" alt="${p.nome}">
+                    ${isMaisVotado ? '<span class="badge bg-danger position-absolute top-0 start-50 translate-middle">Sairia hoje</span>' : ''}
+                  </div>
+                  <div class="col-md-10">
+                    <div class="d-flex justify-content-between mb-1">
+                      <h5 class="mb-0 fw-bold text-light">${p.nome}</h5>
+                      <span class="text-light"><strong>${p.percentual}%</strong> (${p.qtd} votos)</span>
+                    </div>
+                    <div class="progress" style="height: 15px;">
+                      <div class="progress-bar ${isMaisVotado ? 'bg-danger' : 'bg-warning'}" role="progressbar" style="width: ${p.percentual}%"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+
+          container.innerHTML = html;
+        } catch (error) {
+          console.error("Erro ao carregar resultados:", error);
+        }
+      }
+
+      carregarResultados();
+
+      // Confirmação para limpar votos via DELETE
+      document.getElementById("btnConfirmarZerar").addEventListener("click", async () => {
+        await zerarVotos();
+        const modalElement = document.getElementById('modalZerar');
+        const modal = bootstrap.Modal.getInstance(modalElement);
+        modal.hide();
+        carregarResultados();
+      });
+    });
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
